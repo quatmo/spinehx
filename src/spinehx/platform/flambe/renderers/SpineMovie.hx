@@ -23,12 +23,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
+/** 
+ *
+ * Flambe renderer by Kipp Ashford.
+ * 
+ */
 package spinehx.platform.flambe.renderers;
 
 import flambe.Component;
 import flambe.display.Sprite;
 import flambe.display.Texture;
 import flambe.Entity;
+import flambe.util.Assert;
 
 import haxe.ds.ObjectMap;
 
@@ -45,14 +51,24 @@ class SpineMovie extends Component
 {
     /** Skeleton information. */
     public var skeleton (default, null) :Skeleton;
+    /** The skin currently being used. */
+    public var skin (default, null) :String;
     /** The sprites based on region attachment */
     public var sprites :ObjectMap<RegionAttachment, RegionSprite> ;
 
-    public function new (data :SpineData)
+    public function new (data :SpineData, skin :Null<String> = null)
     {
         skeleton = data.skeleton;
-        skeleton.setFlipY(true); // I don't know why we need this, but it keeps everything upright.
+        if (skeleton.data.getSkins().length > 1) {
+            if (skin != null) {
+                skeleton.setSkinByName(skin);
+                this.skin = skin;
+            } else {
+                setSkin(skeleton.data.getSkins()[1].getName()); // Set to the first skin unless otherwise specified.
+            }
+        }
 
+        skeleton.setFlipY(true); // I don't know why we need this, but it keeps everything upright.
         _state = new AnimationState(new AnimationStateData(skeleton.data));
         skeleton.setToSetupPose();
         _holder = new Entity();
@@ -69,7 +85,26 @@ class SpineMovie extends Component
      */ 
     public function setMix(fromName:String, toName:String, duration:Float) :SpineMovie
     {
-        _state.getData().setMixByName(fromName, toName, duration);
+        var from :Animation = skeleton.data.findAnimation(fromName);
+        var to :Animation = skeleton.data.findAnimation(toName);
+        
+        if (from == null) {
+            Assert.fail("SpineMovie.setMix() from animation name '" + fromName + "' is not a valid animation.");
+        }
+        if (to == null) {
+            Assert.fail("SpineMovie.setMix() to animation name '" + toName + "' is not a valid animation.");
+        }
+
+        _state.getData().setMix(from, to, duration);
+        return this;
+    }
+
+    public function setSkin(id :String) :SpineMovie
+    {
+        if (skeleton.data.getSkins().length > 1) {
+            this.skeleton.setSkinByName(id);
+            this.skin = id;
+        }
         return this;
     }
 
@@ -129,7 +164,6 @@ class SpineMovie extends Component
                 regionAttachment.updateVertices(slot);
 
                 var vertices = regionAttachment.getVertices();
-
                 var partSprite :RegionSprite = sprites.get(regionAttachment);
                 
                 if(partSprite == null)
@@ -155,6 +189,8 @@ class SpineMovie extends Component
         }
     }
 
+    /** comment */
+    // private var _data :SpineData;
     /** The container for this skeleton. */
     private var _holder :Entity;
     /** If the running animation should loop or not. */

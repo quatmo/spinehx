@@ -25,7 +25,6 @@ class SpineData
 
 	    var json :SkeletonJson = SkeletonJson.create(new SpineTextureAtlas(pack, name));
         var data :SkeletonData = json.readSkeletonData(name, pack.getFile(name + "/" + name + ".json").toString());
-
         this.skeleton = Skeleton.create(data);
 	}
 
