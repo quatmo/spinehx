@@ -36,6 +36,7 @@ import flambe.display.Texture;
 import flambe.Entity;
 import flambe.util.Assert;
 
+import flambe.util.Value;
 import haxe.ds.ObjectMap;
 
 import spinehx.Animation;
@@ -52,17 +53,18 @@ class SpineMovie extends Component
     /** Skeleton information. */
     public var skeleton (default, null) :Skeleton;
     /** The skin currently being used. */
-    public var skin (default, null) :String;
+    public var skin (default, null) :Value<String>;
     /** The sprites based on region attachment */
     public var sprites :ObjectMap<RegionAttachment, RegionSprite> ;
 
     public function new (data :SpineData, skin :Null<String> = null)
     {
+        this.skin = new Value("default");
+
         skeleton = data.skeleton;
         if (skeleton.data.getSkins().length > 1) {
             if (skin != null) {
-                skeleton.setSkinByName(skin);
-                this.skin = skin;
+                setSkin(skin);
             } else {
                 setSkin(skeleton.data.getSkins()[1].getName()); // Set to the first skin unless otherwise specified.
             }
@@ -103,7 +105,7 @@ class SpineMovie extends Component
     {
         if (skeleton.data.getSkins().length > 1) {
             this.skeleton.setSkinByName(id);
-            this.skin = id;
+            this.skin._ = id;
         }
         return this;
     }
@@ -189,8 +191,6 @@ class SpineMovie extends Component
         }
     }
 
-    /** comment */
-    // private var _data :SpineData;
     /** The container for this skeleton. */
     private var _holder :Entity;
     /** If the running animation should loop or not. */
