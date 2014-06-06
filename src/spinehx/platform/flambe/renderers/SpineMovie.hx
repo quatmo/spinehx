@@ -59,7 +59,7 @@ class SpineMovie extends Component
 
     public function new (data :SpineData, skin :Null<String> = null)
     {
-        this.skin = new Value("default");
+        this.skin = new Value<String>("default");
 
         skeleton = data.skeleton;
         if (skeleton.data.getSkins().length > 1) {

@@ -46,7 +46,7 @@ class RegionSprite extends Sprite
 
     override public function draw (g :Graphics)
     {
-        g.drawSubImage(atlas, 0, 0, region.getRegionX(), region.getRegionY(), _w, _h);
+        g.drawSubTexture(atlas, 0, 0, region.getRegionX(), region.getRegionY(), _w, _h);
     }
 
     override public function getNaturalWidth () :Float
